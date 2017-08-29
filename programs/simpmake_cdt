@@ -1,0 +1,188 @@
+#*****************************************************************************
+#Delaunay Triangulator and MT constructor, version 1.0, 1999.
+#Copyright (C) 1999 DISI - University of Genova, Italy.
+#Group of Geometric Modeling and Computer Graphics DISI.
+#DISI - University of Genova, Via Dodecaneso 35, 16146 Genova - ITALY.
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#*****************************************************************************
+
+# Common includes and libraries
+SYSLIB= -lm
+
+LIBS = $(SYSLIB)
+
+CC = g++ -ansi
+
+# Warning messages
+# WARN= -ansi -Wall
+WARN = -Wno-deprecated -Wno-non-template-friend
+
+# Debug  flags passed to the C compiler
+DEBUGFLAGS= -g
+
+CFLAGS = $(DEBUGFLAGS) $(WARN)
+
+##############################################################################
+# You should not need to change anything below this line.
+
+#-------------------------------------------------------------------------
+# FILES COMMON TO ALL ALGORITHMS
+
+COMMONSOURCES = error.cpp geom.cpp markable.cpp ttrianggc.cpp	\
+	ttriang.cpp mttracer.cpp ttriangulation.cpp basedel.cpp utils.cpp
+
+COMMONOBJECTS = error.o geom.o markable.o ttrianggc.o	\
+	ttriang.o mttracer.o ttriangulation.o basedel.o utils.o
+
+COMMONINCLUDE = basedel.h defs.h tbtree.h error.h	\
+	geom.h markable.h mttracer.h	\
+	tdoublelist.h tlist.h ttriang.h ttrianggc.h	\
+	ttriangulation.h utils.h
+
+$(COMMONOBJECTS): $(COMMONSOURCES) $(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(COMMONSOURCES)
+
+#-------------------------------------------------------------------------
+# FILES FOR ALL REFINEMENT ALGORITHMS
+
+BUILDSOURCES = builddel.cpp refdel.cpp
+BUILDOBJECTS = builddel.o refdel.o
+BUILDINCLUDE = builddel.h refdel.h
+
+$(BUILDOBJECTS): $(BUILDSOURCES) $(BUILDINCLUDE) $(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(BUILDSOURCES)
+
+#-------------------------------------------------------------------------
+# FILES FOR ALL DECIMATION ALGORITHMS
+
+DESTRSOURCES = destrdel.cpp decdel.cpp
+DESTROBJECTS = destrdel.o decdel.o
+DESTRINCLUDE = destrdel.h decdel.h
+
+$(DESTROBJECTS): $(DESTRSOURCES) $(DESTRINCLUDE) $(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(DESTRSOURCES)
+
+#-------------------------------------------------------------------------
+# DELAUNAY REFINEMENT ALGORITHMS
+
+REFSOURCES = refrnddel.cpp referrdel.cpp
+REFOBJECTS = refrnddel.o referrdel.o
+REFINCLUDES = referrdel.h refrnddel.h
+
+RefDel: $(COMMONOBJECTS) $(BUILDOBJECTS) $(REFOBJECTS) RefDelmain.cpp
+	$(CC) $(CFLAGS) -o RefDel	\
+	$(COMMONOBJECTS) $(REFOBJECTS) $(BUILDOBJECTS)	\
+	RefDelmain.cpp $(LIBS)
+
+$(REFOBJECTS): $(REFSOURCES) $(REFINCLUDES) $(BUILDINCLUDE)	\
+	$(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(REFSOURCES)
+
+#-------------------------------------------------------------------------
+# DELAUNAY DECIMATION ALGORITHMS (REMOVE ONE VERTEX AT A TIME)
+
+DECSOURCES = decrnddel.cpp decerrdel.cpp
+DECOBJECTS = decrnddel.o decerrdel.o
+DECINCLUDES = decrnddel.h decerrdel.h
+
+DecDel: $(COMMONOBJECTS) $(DESTROBJECTS) $(DECOBJECTS) DecDelmain.cpp
+	$(CC) $(CFLAGS) -o DecDel	\
+	$(COMMONOBJECTS) $(DECOBJECTS) $(DESTROBJECTS)	\
+	DecDelmain.cpp $(LIBS)
+
+$(DECOBJECTS): $(DECSOURCES) $(DECINCLUDES) $(DESTRINCLUDE)	\
+	$(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(DECSOURCES)
+
+#-------------------------------------------------------------------------
+# DELAUNAY DECIMATION ALGORITHMS (REMOVE SETS OF VERTICES SIMULTANEOUSLY)
+
+SDECSOURCES = deberg.cpp decerrdb.cpp decrnddb.cpp
+SDECOBJECTS = deberg.o decerrdb.o decrnddb.o
+SDECINCLUDES = deberg.h decerrdb.h decrnddb.h
+
+SiDecDel: $(COMMONOBJECTS) $(DESTROBJECTS) $(SDECOBJECTS)	\
+	$(DECOBJECTS) SiDecDel.cpp
+	$(CC) $(CFLAGS) -o SiDecDel	\
+	$(COMMONOBJECTS) $(SDECOBJECTS) $(DECOBJECTS)	\
+	$(DESTROBJECTS) SiDecDel.cpp $(LIBS)
+
+$(SDECOBJECTS): $(SDECSOURCES) $(SDECINCLUDES) $(DECINCLUDES)	\
+	$(DESTRINCLUDE)	$(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(SDECSOURCES)
+
+#-------------------------------------------------------------------------
+# CONSTRAINED DELAUNAY DECIMATION ALGORITHMS (ONE VERTEX AT A TIME)
+
+DCDTSOURCES = decCDT.cpp decerrCDT.cpp decrndCDT.cpp
+DCDTOBJECTS = decCDT.o decerrCDT.o decrndCDT.o
+DCDTINCLUDES = decCDT.h decerrCDT.h decrndCDT.h
+
+DecCDT: $(COMMONOBJECTS) $(DESTROBJECTS) $(DECOBJECTS)	\
+	$(DCDTOBJECTS) DecCDTmain.cpp
+	$(CC) $(CFLAGS) -o DecCDT	\
+	$(COMMONOBJECTS) $(DCDTOBJECTS) $(DESTROBJECTS)	\
+	$(DECOBJECTS) DecCDTmain.cpp $(LIBS)
+
+$(DCDTOBJECTS): $(DCDTSOURCES) $(DCDTINCLUDES) $(DESTRINCLUDE)	\
+	$(DECSOURCES) $(DECINCLUDES) $(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(DCDTSOURCES)
+
+#-------------------------------------------------------------------------
+# CONSTRAINED DELAUNAY DECIMATION ALGORITHMS (SETS OF VERTICES)
+
+SDCDTSOURCES = decrnddbCDT.cpp 
+SDCDTOBJECTS = decrnddbCDT.o
+SDCDTINCLUDES = decrnddbCDT.h
+
+SiDecCDT: $(COMMONOBJECTS) $(DESTROBJECTS) $(DECOBJECTS) $(SDECOBJECTS)	\
+	$(DCDTOBJECTS) $(SDCDTOBJECTS) SiDecCDT.cpp
+	$(CC) $(CFLAGS) -o SiDecCDT	\
+	$(COMMONOBJECTS) $(DCDTOBJECTS) $(SDCDTOBJECTS)	\
+	$(DESTROBJECTS) $(DECOBJECTS) $(SDECOBJECTS) SiDecCDT.cpp $(LIBS)
+
+$(SDCDTOBJECTS): $(SDCDTSOURCES) $(SDCDTINCLUDES) $(DCDTINCLUDES)	\
+	$(DESTRINCLUDE)	\
+	$(DECSOURCES) $(DECINCLUDES) $(COMMONINCLUDE)
+	$(CC) $(CFLAGS) -c $(SDCDTSOURCES)
+
+#-------------------------------------------------------------------------
+# ALGORITHM FOR BUILDING A CDT
+
+RCDTSOURCES = builddel.cpp refdel.cpp destrdel.cpp decdel.cpp	\
+	refCDT.cpp decCDT.cpp
+RCDTOBJECTS = builddel.o refdel.o destrdel.o decdel.o refCDT.o decCDT.o
+RCDTINCLUDES = builddel.h refdel.h destrdel.h decdel.h refCDT.h decCDT.h
+
+RefCDT: $(COMMONOBJECTS) $(RCDTOBJECTS) RefCDTmain.cpp
+	$(CC) $(DEBUGFLAGS) -o RefCDT	\
+	$(COMMONOBJECTS) $(RCDTOBJECTS) RefCDTmain.cpp $(SYSLIBS)
+
+refCDT.o: $(DCDTSOURCES) $(DCDTINCLUDES) $(DECINCLUDE)	\
+	$(BUILDINCLUDE) $(DESTRINCLUDE)	\
+	refCDT.cpp refCDT.h
+	$(CC) $(DEBUGFLAGS) -c refCDT.cpp
+
+#-------------------------------------------------------------------------
+# GENERAL STUFF
+
+clean: 
+	rm *.aux *.o core	\
+	RefDel DecDel SiDecDel DecCDT SiDecCDT RefCDT
+
+all: RefDel DecDel SiDecDel DecCDT SiDecCDT RefCDT
+
+#-------------------------------------------------------------------------

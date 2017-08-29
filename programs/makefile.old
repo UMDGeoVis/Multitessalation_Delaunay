@@ -1,0 +1,77 @@
+#*****************************************************************************
+#Delaunay Triangulator and MT constructor, version 1.0, 1999.
+#Copyright (C) 1999 DISI - University of Genova, Italy.
+#Group of Geometric Modeling and Computer Graphics DISI.
+#DISI - University of Genova, Via Dodecaneso 35, 16146 Genova - ITALY.
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#*****************************************************************************
+
+# Common includes and libraries
+SYSLIB= -lm
+
+MT_DIR = ../../MT
+
+MTINCLUDE = -I$(MT_DIR)/include/krnl -I$(MT_DIR)/include/ext
+MTLIB = -L$(MT_DIR)/lib -lMT -L$(MT_DIR)/lib -lMText
+
+LIBS = $(MTLIB) $(SYSLIB)
+
+CC = g++
+
+# Warning messages
+WARN= -ansi -Wno-deprecated -Wno-non-template-friend
+
+# Debug  flags passed to the C compiler
+DEBUGFLAGS= -g
+
+CFLAGS = $(DEBUGFLAGS) $(MTINCLUDE)
+
+##############################################################################
+# You should not need to change anything below this line.
+
+SOURCES = error.cpp geom.cpp markable.cpp ttrianggc.cpp	\
+	ttriang.cpp mttracer.cpp ttriangulation.cpp basedel.cpp	\
+	builddel.cpp refdel.cpp refrnddel.cpp referrdel.cpp	\
+	destrdel.cpp decdel.cpp decrnddel.cpp decerrdel.cpp	\
+	deberg.cpp decrnddb.cpp decerrdb.cpp utils.cpp
+
+OBJECTS = error.o geom.o markable.o ttrianggc.o	\
+	ttriang.o mttracer.o ttriangulation.o basedel.o	\
+	builddel.o refdel.o refrnddel.o referrdel.o 	\
+	destrdel.o decdel.o decrnddel.o decerrdel.o	\
+	deberg.o decrnddb.o decerrdb.o utils.o
+
+INCLUDES = basedel.h builddel.h deberg.h decdel.h decerrdb.h decerrdel.h \
+	decrnddb.h decrnddel.h defs.h destrdel.h error.h geom.h \
+	markable.h mttracer.h refdel.h referrdel.h \
+	refrnddel.h tbtree.h \
+	tdoublelist.h tlist.h ttriang.h ttrianggc.h \
+	ttriangulation.h utils.h
+
+#-------------------------------------------------------------------------
+
+Delaunaymt: $(OBJECTS)
+	echo "object files made"
+#	$(CC) $(CFLAGS) -o Delaunaymt $(OBJECTS) $(LIBS)
+
+$(OBJECTS): $(SOURCES) $(INCLUDES)
+	$(CC) $(CFLAGS) -c $(SOURCES)
+
+#clean: 
+#	rm -f  Delaunaymt *.o core 
+
+# maggio 2011
+# Non riesce a compilare dovuto a problemi con uso dei template

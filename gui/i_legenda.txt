@@ -1,0 +1,215 @@
+=====================================================================
+GRAPHICAL USER INTERFACE 
+FOR VIEWING TERRAIN DECIMATION AND REFINEMENT
+=====================================================================
+
+INTRODUCTION
+
+This graphical user interface has been developed to ease the usage 
+of the programs in package MT_DELAUNAY for terrain decimation and
+refinement.
+There are two versions of the interface:
+- view_ref for viewing refinement algorithms
+- view_dec for viewing decimation algorithms
+The two interfaces are very similar. This file contains the 
+documentation for both.
+
+The interface has two screens, that are shown alternatively:
+- help screen
+- rendering screen
+Press * to switch to the other screen.
+Press ESC, q, or Q to quit the program.
+
+HELP SCREEN
+
+The help screen shows the stages of execution of the program.
+The stages must be traversed forward, and it is not possible 
+to roll back.
+Some stages are typical of decimation or of refinement, other
+stages are common to both.
+
+In general, the sequence of stages has the following structure:
+
+- preliminary settings for the algorithm (different in decimation
+  and refinement)
+- loading data
+- settings of termination conditions
+- running the algorithm
+- end
+
+Each stage has its menu. 
+The menus are active both in the help screen and in the rendering 
+screen.
+In all menus (except the one for loading data), the user can choose 
+"go to next stage" and keep default settings.
+
+STAGES - PRELIMINARY SETTINGS
+
+In decimation, preliminary setting cover two stages:
+
+- set decimation type and norm for evaluating the error of the
+  triangulation
+- set additional simplification options
+
+Decimation type is one of:
+- random Delaunay (remove one vertex at the time, randomly chosen)
+- error-driven Delaunay (remove one vertex at the time, chosen 
+  based on an estimate of the error increase after its removal:
+  the idea is to minimize error increase)
+- random Delaunay simultaneously (same as random Delaunay, but 
+  remove a set of independent vertices at each iteration)
+- error-driven Delaunay simultaneously (same as error-driven Delaunay,
+  but remove a set of independent vertices at each iteration)
+- random CDT (remove one vertex at the time, randomly chosen, from
+  a constrained Delaunay triangulation: take care to preserve the
+  structure of chains of constraints)
+- error-driven CDT (same as random CDT, but the vertex is chosen    
+  based on an estimate of the error increase after its removal:
+  the idea is to minimize error increase)
+
+Norm for evaluating the error of the triangulation is one of:
+- maximum error: the error of the triangulation is the maximum error
+  over the errors of its triangles
+- mean error: the error of the triangulation is the mean error
+  over the errors of its triangles
+- mean square  error: the error of the triangulation is the mean
+  square error over its triangles
+
+Additional simplification options include bound on vertex degree
+and other options for CDT decimation only.
+
+Bound on vertex degree allows to remove only vertices with a limited
+number of incident edges (the vertex degree). The bound can be one of:
+- any degree (no limitation)
+- set max degree (the user is asked to provide a value, which must
+  be equal to, or greater than 3)
+
+Options for CDT decimation only are:
+- allow extension of optimization: the presence of constraint edges
+  does not guarantee that a vertex removal affects the Delaunay
+  property only for triangles of its influence region; if this options
+  is off, the Delaunay property is checked only for triangles of the
+  influence region; if it is on, the check is extended to triangles
+  outside the influence region
+- shorten open contraints chains: if this options is off, vertices with
+  only one incident contraint cannot be removed; if it is on, such
+  vertices can be removed (in practice, this allows for shortening open
+  contraints chains)
+- break closed contraints chains: if this options is off, vertices of a 
+  closed chain of three constraint edges cannot be removed; if it is on,
+  such vertices can be removed (in practice, this allows for breaking
+  closed contraints chains)
+
+In refinement, preliminary setting cover one stage:
+
+- set refinement type and norm for evaluating the error of the
+  triangulation
+
+Refinement type is one of:
+- random Delaunay (insert one vertex at the time, randomly chosen)
+- error-driven Delaunay (insert one vertex at the time, chosen
+  based on its error with respect to the current triangulation:
+  the point causing the maximum error is chosen, the idea is to
+  maximize error decrease at each insertion)
+- CDT (insert one vertex at the time, then all constraints; this
+  option does not take care of error and is provided only to build
+  a CDT to be used as an input for CDT decimation)
+
+Norm for evaluating the error of the triangulation is the same as
+in the case of decimation.
+
+STAGES - LOADING DATA
+
+The user is required to provide the file name.
+The following filename extensions are assumed:
+- pts: file containing points only, input for Delaunay refimenent
+- seg: file containing points and segments, input for CDT refimenent
+- tri: file containing a triangulation (vertices and triangles), 
+  input for Delaunay decimation
+- cdt: file containing a CDT (vertices, triangles, constraint edges),
+  input for CDT decimation
+
+After loading data, the interface goes to next stage.
+It is now possible to see the loaded data in rendering mode.
+
+STAGES - SETTINGS OF TERMINATION CONDITIONS
+
+By default, the algorithm does not run (it is set to perform no update).
+
+The possible termination conditions are:
+- all possible updates: insert all points, or remove all removable
+  vertices
+- number of updates: the user is required to provide after how many
+  updates the decimation or insertion process must stop
+- error level: the user is required to provide the error threshold
+  after which the decimation or insertion process must stop
+
+STAGES - RUNNING THE ALGORITHM
+
+The following options are possible:
+- next step: insert next point, or remove next vertex
+- all steps: run the process until the termination condition is
+  fullfilled
+- write triangulation to file: write the current triangulation to
+  file, the user is required to provide the file name
+
+While the algorithm runs, it is possible to see the evolution of the
+current triangulation in the rendering screen.
+
+STAGES - END
+
+Now it is only possible to write the current (and final) triangulation
+to file, or to quit.
+
+INPUT FROM THE USER
+
+Input from the user (e.g., the name of the file to load data, the number
+of updates for termination...) is collected by means of a small white 
+window superimposed to the current screen.
+The user must type the input in it and finish with the "return" key.
+Backspace is active.
+The normal control keys (such as "q" for quitting) are disabled, while
+the ESC key acts as a "cancel" button for this window.
+
+RENDERING SCREEN
+
+The current triangulation can be rendered in 2D or 3D mode.
+
+The various entities composing the current situation can be shown 
+or hidden separately:
+- the data points (white)
+- the vertices of the current triangulation (yellow)
+- the triangles of the current triangulation (hollow with 
+  green edges; in 3D also the filled mode is available,
+  with green upper face and yellow bottom face)
+- input constraint segments, if any (orange)
+- constraint edges of the current triangulation, if any (red)
+
+The user can change the rendering modalities with a set of
+commands, as documented in the table below:
+
+--------------+----------------------------------------------
+Key or device | Effect
+--------------+----------------------------------------------
+            + | zoom in
+            - | zoom out
+            = | restore initial zoom, rotations, translations
+          p P | show / hide input points
+          c C | show / hide input constraints (if any)
+          v V | show / hide vertices of current triangulation
+          t T | show / hide triangles of current triangulation
+          s S | show / hide segments of current triangulation
+      ESC q Q | quit program
+            * | switch help screen / rendering screen
+            2 | switch to 2D rendering
+            3 | switch to 2D rendering
+            < | decrease ratio z / xy in 3D rendering
+            > | increase ratio z / xy in 3D rendering
+           F1 | switch rotation / translation control (one is
+              | controlled by mouse drag, the other one by arrows)
+       arrows | either rotate or translate, depending on 
+              | current control (see F1 key)
+   mouse drag | either rotate or translate, depending on 
+              | current control (see F1 key)
+           F2 | switch wireframe / solid in 3D rendering
+--------------+----------------------------------------------

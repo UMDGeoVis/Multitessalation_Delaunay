@@ -1,0 +1,149 @@
+#***************************************************************************
+#The Multi-Tesselation (MT) version 1.0, 1999.
+#A dimension-independent package for the representation and manipulation of
+#spatial objects as simplicial complexes at multiple resolutions.
+#
+#Copyright (C) 1999 DISI - University of Genova, Italy.
+#Group of Geometric Modeling and Computer Graphics DISI.
+#Program written by Paola Magillo <magillo@disi.unige.it>.
+#DISI - University of Genova, Via Dodecaneso 35, 16146 Genova - ITALY.
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#***************************************************************************
+
+# ------------------------------------------------------------------------
+# MAKEFILE for generating graphical user interface for MT_DELAUNAY
+# ------------------------------------------------------------------------
+
+# by Paola Magillo, DISI, Genova, 2006
+
+MTDIR = /home/local/magillo/SW/MT
+
+# ------------------------------------------------------------------------
+# Include directories
+# ------------------------------------------------------------------------
+
+# If this file is in directory MT/demo, you should not have to change this
+INCLDIR = -I$(MTDIR)/include/krnl -I$(MTDIR)/include/ext 
+
+# ------------------------------------------------------------------------
+# Flags
+# ------------------------------------------------------------------------
+
+# These flags should work on almost any system
+CFLAGS = -ansi -g $(INCLDIR)
+
+# ------------------------------------------------------------------------
+# Compiler
+# ------------------------------------------------------------------------
+
+# This must be the C++ compiler available on your system
+CC = g++ -g -Wno-deprecated -Wno-non-template-friend
+
+# ------------------------------------------------------------------------
+# Graphic Libraries
+# ------------------------------------------------------------------------
+
+# This is the directory containing libX11.so libXmu.so libXext.so
+XLIBDIR = /usr/X11R6/lib
+
+# These are the X libraries
+XLIBS = -L$(XLIBDIR) -lXmu -lX11 -lXext
+
+# If your are using Mesa, this is the directory containing 
+# libMesaGL.so libMesaGLU.so
+# If your are using OpenGL, this is the directory containig 
+# libMesaGL.so libMesaGLU.so
+GLLIBDIR = /usr/X11R6/lib
+
+# [1] These are the OpenGL libraries if you are using Mesa 
+#     (mutually exclusive with [2])
+#GLLIBS = -L$(GLLIBDIR) -lMesaGL -lMesaGLU
+
+# [2] These are the OpenGL libraries if you are using OpenGL
+#     (mutually exclusive with [1])
+GLLIBS = -L$(GLLIBDIR) -lGL -lGLU
+
+# This is the Glut library (using the static library since the dynamic 
+# sometimes gives problems)
+GLUTLIBS = -L/usr/11R6/lib -lglut
+
+# These are all the graphic libraries
+GRAPHIC_LIBS = $(GLUTLIBS) $(GLLIBS) $(XLIBS)
+
+# This is the directory containing the subdirectory GL inside
+# (subdirectory GL is the one containing glut.h and gl.h)
+GRAPHIC_INCLUDE = -I/usr/X11R6/include
+
+# ------------------------------------------------------------------------
+# MT libraries
+# ------------------------------------------------------------------------
+
+# If this file is in directory MT/demo, you should not have to change this
+# You shuold have already have the files MT/libMT.so and MT/libMText.so
+# that come from compiling the kernel library and the extended library
+LIB_MT = -L$(MTDIR)/lib/ -lMT
+LIB_MT_EXT = -L$(MTDIR)/lib/ -lMText
+
+# ------------------------------------------------------------------------
+# Terrain simplification
+# ------------------------------------------------------------------------
+
+PROG_DIR = ../programs
+
+SRCS = $(PROG_DIR)/error.cpp $(PROG_DIR)/geom.cpp	\
+	$(PROG_DIR)/markable.cpp $(PROG_DIR)/ttrianggc.cpp	\
+	$(PROG_DIR)/ttriang.cpp $(PROG_DIR)/mttracer.cpp	\
+	$(PROG_DIR)/ttriangulation.cpp $(PROG_DIR)/basedel.cpp	\
+	$(PROG_DIR)/utils.cpp $(PROG_DIR)/destrdel.cpp	\
+	$(PROG_DIR)/decdel.cpp refdel.cpp referrdel.cpp	\
+	$(PROG_DIR)/refrnddel.cpp $(PROG_DIR)/decCDT.cpp	\
+	$(PROG_DIR)/decerrCDT.cpp $(PROG_DIR)/decrndCDT.cpp	\
+	$(PROG_DIR)/decrnddbCDT.cpp $(PROG_DIR)/decrnddb.cpp	\
+	$(PROG_DIR)/deberg.cpp $(PROG_DIR)/decerrdb.cpp	\
+	$(PROG_DIR)/refCDT.cpp $(PROG_DIR)/builddel.cpp	\
+	$(PROG_DIR)/decrnddel.cpp $(PROG_DIR)/decerrdel.cpp	\
+	$(PROG_DIR)/stepbystep.cpp
+
+OBJS = error.o geom.o markable.o ttrianggc.o	\
+	ttriang.o mttracer.o ttriangulation.o basedel.o	\
+	utils.o destrdel.o decdel.o refdel.o referrdel.o \
+	refrnddel.o decCDT.o decerrCDT.o decrndCDT.o	\
+	decrnddbCDT.o decrnddb.o deberg.o decerrdb.o \
+	refCDT.o builddel.o decrnddel.o decerrdel.o stepbystep.o
+
+
+$(OBJS): $(SRCS)
+	$(CC) -c $(INCLUDE) $(SRCS)
+
+# ------------------------------------------------------------------------
+# Programs
+# ------------------------------------------------------------------------
+
+view_dec: i_dec.c i_global.h i_render.c i_common.c
+	$(CC) $(CFLAGS) -o view_dec $(OBJS)	\
+	i_dec.c i_render.c i_common.c	\
+	-g $(INCLUDE) $(GRAPHIC_INCLUDE) $(GRAPHIC_LIBS)	\
+	$(LIB_MT) $(LIB_MT_EXT) -lm
+
+view_ref: i_ref.c i_global.h i_render.c i_common.c
+	$(CC) $(CFLAGS) -o view_ref $(OBJS)	\
+	i_ref.c i_render.c i_common.c	\
+	-g $(INCLUDE) $(GRAPHIC_INCLUDE) $(GRAPHIC_LIBS)	\
+	$(LIB_MT) $(LIB_MT_EXT) -lm
+
+env:
+	setenv LD_LIBRARY_PATH /home/local/magillo/SW/MT/lib
+

@@ -1,0 +1,14 @@
+MT_DELAUNAY
+
+This sofware has been developed by several persons,
+master students, pdh students, collaborators and
+researchers at the Department of Computer and Information
+Sciences (DISI) of the University of Genova, Italy.
+
+Among them, we want to remember:
+
+Christian Melchiorre for the base version (1997)
+Paola Bonetto (1998)
+Alessio Calcagno for the extension to CDTs (1999)
+Rani Al Hamarneh for general revision (2004)
+

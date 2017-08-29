@@ -1,0 +1,603 @@
+<HTML>  
+
+<TITLE>The MT (Multi-Tesselation) Package - MT Delaunay</TITLE>
+
+<BODY>
+
+<H1>MT DELAUNAY</H1>
+
+<H2>Terrain triangulation and construction of a Multi-Triangulation</H2>
+
+<B>MT Delaunay</B> allows
+the construction of MTs for
+terrains (two-dimensional scalar fields) based on a 
+(constrained) Delaunay triangulation of the plane domain of the terrain.
+<P>
+
+MT Delaunay includes a number of programs implementing
+different techniques for the 
+construction and iterative modification of Delaunay triangulations 
+and constrained Delaunay triangulation
+through vertex insertion or vertex removal.
+As a side effect, the program builds an MT from the sequence of local
+modifications performed.
+</P>
+
+<H3>Programs within MT Delaunay</H3>
+
+<P>
+<B>MT Delaunay</B> contains six programs, corresponding to
+the following approaches:
+<OL>
+<LI>
+ <B>RefDel / MtRefDel</B> -- 
+ Construction of a Delaunay triangulation starting from a set of points
+ through iterative vertex insertion / and production of an MT.
+<LI>
+ <B>RefCDT</B> --
+ Construction of a constrained Delaunay triangulation starting from a set 
+ of points and line segments. This functionality is just meant to provide
+ an input file for the algorithms based on vertex removal 
+ (see point 4 below), and does not produce an MT.
+<LI>
+ <B>DecDel / MtDecDel</B> --
+ Decimation of a Delaunay triangulation through iterative vertex removal
+ (by removing one vertex at a time) / and production of an MT.
+<LI>
+ <B>SiDecDel / MtSiDecDel</B> --
+ Decimation of a Delaunay triangulation through iterative vertex removal,
+ (by removing a removing a set of independent vertices at a time,
+ i.e., a maximal set of vertices which can be 
+ removed simultaneously without interfering) /
+ and production of an MT.
+<LI>
+ <B>DecCDT / MtDecCDT</B> --
+ Decimation of a constrained Delaunay triangulation through iterative 
+ vertex removal
+ (by removing one vertex at a time) / and production of an MT.
+<LI>
+ <B>SiDecCDT / MtSiDecCDT</B> --
+ Decimation of a constrained Delaunay triangulation through iterative
+ vertex removal 
+ (by removing a removing a set of independent vertices at a time,
+ i.e., a maximal set of vertices which can be
+ removed simultaneously without interfering) / and production of an MT.
+</OL>
+
+<P>
+Each program, with the exception of RefCDT, can be compiled in two versions:
+<UL>
+<LI>the version named with the "Mt" prefix builds an MT as a side effect
+<LI>the other one just builds the final (refined or coarsened) triangulation.
+</UL>
+</P>
+
+<P>
+The MT is produced together with the approximation errors of its triangles.
+<BR>
+
+The <B>approximation error of a triangle</B> 
+<I>t</I> is evaluated as the 
+maximum vertical distance between a point (not vertex of the triangulation),
+whose vertical projection falls inside or on the boundary of <I>t</I>,
+and the plane of <I>t</I>.
+</P>
+
+<P>
+Vertices can be inserted / removed either in a
+random order, or selected according to heuristic criteria which try to 
+achieve the least approximation error for a given number of triangles in
+the current representation.
+<BR>
+In the latter case, the next point to be inserted is the one that is likely
+to decrease the approximation error as quickly as possible, and the the next
+point to be removed is the one that is likely to increase the approximation
+error as slowly as possible.
+</P>
+
+<P>
+In all algorithms, 
+the iterative process may stop either when a given number of the
+available vertices has been inserted / removed, or when the approximation
+error of the current model reaches a certain global approximation error.
+</P>
+
+<P>
+Functionalities involving standard (i.e., unconstrained) 
+Delaunay triangulations are documented in the paper:
+<PRE>
+L. De Floriani, P. Magillo, E. Puppo,
+Building and Traversing a Surface at Variable Resolution,
+Proceedings IEEE Visualization '97,
+Phoenix, Arizona, October 19-24, 1997,
+pp. 103-110.
+</PRE>
+Functionalities involving constrained Delaunay triangulations
+are briefly described <A HREF="#CDT">here</A>.
+</P>
+
+<H3>How to compile the programs</H3>
+
+<P>
+Two makefiles are provided:
+<OL>
+<LI><TT>mtmake</TT> compiles the programs to refine
+    or coarsen a triangulation and build an MT as a side effect
+    (program names with the "Mt" prefix)
+<LI><TT>simpmake</TT> compiles the programs just to refine
+    or coarsen a triangulation, without building 
+    an MT as a side effect
+    (program names without the "Mt" prefix)
+</OL>
+In the first case, you need the 
+<A HREF="ftp://ftp.disi.unige.it/person/MagilloP/MT_SW/MT/doc/index.html">
+MT library</A> to compile and run the programs.
+</P>
+
+<P>
+Check that the compiler and options contained in the appropriate
+makefile match the ones of your system;
+edit the file if necessary.
+</P>
+
+<P>
+To compile all programs in the version
+which produces an MT, type:
+<BR>
+<TT>make -f mtmake all</TT> 
+</P>
+
+To compile all programs in the version which does not produce an MT, type:
+<BR>
+<TT>make -f simpmake all</TT>
+</P>
+
+<P>You can also make each target separately.</P>
+
+<P>
+<B>Remark:</B> if you compile both versions, remember to remove all the
+".o" files between compiling the second time with a different makefile.
+</P>
+
+<H3>How to run the programs</H3>
+
+<P>
+For all of the six programs,
+you can run the program from the command line by typing
+(assuming that PROG is the name of the chosen program):
+<UL>
+<TT>./PROG InFile OutFile [format string]</TT>
+</UL>
+where
+<UL>
+<LI><TT>InFile</TT> is the input file
+<LI><TT>OutFile</TT> is the output file
+(it will contain the final refined or coarsened triangulation)
+<LI><TT>format string</TT> (optional) contains the parameters 
+for the algorithm.
+</UL>
+</P>
+
+<P>
+For algorithms based on vertex insertion (PROG = RefDel or RefCDT), 
+the input file 
+contains a set of points and, possibly, a set of straight-line segments.
+<BR>
+For algorithms based on vertex removal (PROG = DecDel, SiDecDel, DecCDT,
+SiDecCDT), it contains a possibly constrained Delaunay triangulation.
+</P>
+
+<P>
+The output file will contain the final triangulation resulting from
+applying the given algorithm to the input data, with the
+parameters that the user will give.
+</P>
+
+<P>
+For a description of the format of point and triangulation files,
+see <A HREF="#FORMATS">file formats</A>).
+<P>
+
+<H3>Parameters and the format string</H3>
+
+<P>
+Parameters may be provided to the algorithm by command line
+(through the <B>format string</B>), or <B>interactively</B>.
+</P>
+
+<P>
+The format string contains the following parameter specifications, in
+this order:
+<OL>
+<LI><P>
+One letter defining the <B>criterion for selecting the next vertex</B> 
+to be processed
+(or the next vertex set, in case of simultaneous decimation):
+<UL>
+<LI>
+ <TT>e</TT>: Error-driven selection.
+<LI>
+ <TT>r</TT>: Random selection.
+</UL>
+</P></LI>
+<LI><P>
+Only for programs based on decimation, if the selected criterion is
+error-driven: one letter defining the <B>mode of 
+estimation of the error increase</B> caused by removing a vertex:
+<UL>
+<LI>
+ <TT>a</TT>: Use a (faster) approximate estimation.
+<LI>
+ <TT>e</TT>: Use a (slower) precise estimation.
+</UL>
+</P></LI>
+<LI><P>
+Only for programs based on decimation: one number
+defining the <B>maximum degree for a removable vertex</B>:
+<UL>
+<LI>
+ 0: Vertices of any degree can be removed.
+<LI>
+ N: (with N&gt;0 integer) Only vertices of degree at most N can be removed.
+</UL>
+</P></LI>
+<LI><P>
+One letter, possibly followed by other elements, 
+defining <B>when the process must terminate</B>:
+<UL>
+<LI>
+ <TT>u</TT> N: (with N&gt;0 an integer) Stop after N updates 
+ (i.e., when N vertices have been inserted,
+ or removed (e.g., <TT>u 100</TT> inserts / removes 100 vertices).
+<LI>
+ <TT>a</TT>: Stop after all possible updates have been 
+ performed, i.e., when all points have been inserted, or
+ all removable vertices have been removed 
+ (vertices defining the corners of the domain, 
+ and vertices with a degree over the maximum, are not removable).
+<LI>
+ <TT>e</TT> N V: (with V&gt;=0 a real number and N a letter)
+ Stop when the approximation error of the current triangulation
+ reaches the value V. Letter N specifies how
+ to compute the global error of the triangulation, and can be one of:
+ <BR>
+ x: maximum error over all triangles;
+ <BR>
+ s: mean error over all triangles;
+ <BR>
+ q: mean of squared triangle errors.
+</UL>
+</P></LI>
+<LI><P>
+Only for programs decimating a constrained triangulation:
+one letter specifying if the user wants to <B>change the default
+treatment of some situations</B>:
+<UL>
+<LI>
+ <TT>n</TT>: The user will use the default parameters.
+<LI>
+ <TT>s</TT>: The user will redefine the default
+ parameters. In this case, the options is followed by three flags.
+ Each can be set either to <TT>s</TT> or to <TT>n</TT> (default = n):
+ <BR>
+   First flag: if <TT>s</TT>, enables extension of optimization (slower,
+   but produces triangulations of better quality).
+ <BR>
+   Second flag: if <TT>s</TT>, allows the elimination of points in which
+   exactly one constraint is incident (endpoints of open chains of
+   constraint edges).
+ <BR>
+   Third flag: if <TT>s</TT>, allows breaking closed chains of constraint
+   edges.
+</UL>
+</OL>
+</P>
+
+<P>
+If the format string is missing from the command line, the program will
+prompt the user and ask for the parameters interactively
+(for each parameter, a short explanation is provided).
+</P>
+
+<H4>Examples of program calls with format strings</H4>
+
+<P>
+<TT>./DecDel input.tri output.tri e a 10 u 1000</TT><BR>
+Decimate a triangulation by removing one point at a time (program DecDel). 
+The point is chosen on the basis of its approximation error 
+(<TT>e</TT>) estimated in an approximate way (<TT>a</TT>).
+Vertices with a degree larger than 10 cannot be removed (<TT>10</TT>).
+The process stops after having removed 1000 vertices (<TT>u 1000</TT>).
+</P>
+
+<P>
+<TT>./SiDecDel input.tri output.tri r 0 e x 10.0</TT><BR>
+Decimate a triangulation by removing sets of independents
+points simultaneously (program SiDecDel).
+Points to be removed are chosen randomly (<TT>r</TT>).
+No restrictions on the degree of removed vertices (<TT>0</TT>).
+The process stops when the approximation error, computed as the maximum
+error over all triangles, reaches the value 10.0 (<TT>e x 10.0</TT>).
+</P>
+
+<P>
+<TT>./DecCDT input.cdt output.cdt e a 10 u 1000 n</TT><BR>
+Decimate a constrained triangulation (program DecCDT).
+All settings are as in the first example. 
+In addition, the default settings for CDT decimation are used (<TT>n</TT>).
+</P>
+
+<P>
+<TT>./DecCDT input.cdt output.cdt e e n u 2000 s s s n</TT><BR>
+Decimate a constrained triangulation (program DecCDT).
+Points to be removed are chosen according to their error (<TT>e</TT>) 
+which is computed exactly (<TT>e</TT>).
+No limitation on the degree of removable vertices (<TT>n</TT>).
+The process stops when 2000 points have been removed (<TT>u 2000</TT>).
+The specific settings for CDT decimation are modified 
+(<TT>s</TT>) in this way: enable
+extension of optimization and removal of vertices with exactly one
+incident constraint (<TT>s s</TT>), do not enable simplification
+of closed chains of constraints (<TT>n</TT>).
+</P>
+
+<P>
+<TT>./RefDel input.pts output.tri r u 1000</TT><BR>
+Refine a triangulation (program RefDel) by inserting points in a random 
+order (<TT>r</TT>). The process stops after having inserted 1000
+points (<TT>u 1000</TT>).
+</P>
+
+<P>
+<TT>./RefDel input.pts output.tri e e s 10.0</TT> <BR>
+Refine a triangulation (program RefDel) by inserting points chosen on the 
+basis of their approximation error(<TT>e</TT>). 
+The process stops when the appoximation error of the triangulation,
+computed as the mean over all triangle errors, reaches the value 10.0
+(<TT>e s 10.0</TT>).
+</P>
+
+<P>
+<TT>./RefCDT input.seg output.cdt r u 1000</TT>
+Refine a constrained triangulation (program RefCDT) by inserting 1000 
+points randomly (<TT>r u 1000</TT>).
+</P>
+
+<A NAME="WHERE_MT"><H3>Where to find the resulting MT</H3></A>
+
+<P>
+A Multi-Triangulation (file <TT>output.mtf</TT>) and related tile errors
+(file <TT>output.err</TT>) are automatically generated by
+each program, if used in the version whose name starts with "Mt"
+(this version is compiled with macro
+<TT>MT_TRACER</TT> set, as specified in makefile <TT>mtmake</TT>).
+</P>
+
+<P>
+The algorithm for refining a constrained Delaunay triangulation 
+(RefCDT) is not suitable for MT construction. 
+It only exist to provide a way for building 
+a constrained triangulation to be decimated.
+</P>
+
+<A NAME="FORMATS"></A>
+
+<H3>File Formats</H3>
+
+<H4>Input files</H4>
+
+<P>
+The input for vertex-insertion algorithms (algorithms RefDel, RefCDT)
+is an ASCII file made up of a mandatory part containing a set of vertices
+to be inserted in the triangulation, followed by an optional part
+containing a set of straight-line segments having their endpoints in the
+given vertex set.
+</P>
+
+<P>
+The syntax for the mandatory part is the following:
+
+<PRE>
+NumPoints          // Number of points (INTEGER, greater or equal to 3)
+
+X1 Y1 Z1           // First point (three FLOATs)
+X2 Y2 Z2           // Second point (three FLOATs)
+...
+Xn Yn Yn           // Last point (three FLOATs), n = NumPoints
+</PRE>
+
+The syntax for the optional part is the following:
+
+<PRE>
+NumSegments        // Number of segments (INTEGER, greater or equal to 0)
+
+I1 J1              // First segment (two INTEGERs)
+I2 J2              // Second segment (two INTEGERs)
+...
+Im Jm              // Last segment (two INTEGERs), m = NumSegments 
+</PRE>
+
+Integers <TT>Ik</TT> and <TT>Jk</TT> are the indices of the two endpoints
+of the <TT>k</TT>-th segment in the previous list of vertices; the range of
+valid indices is <TT>[0,NumPoints-1]</TT>.
+</P>
+
+<P>
+The optional part, even if present, is not considered by algorithm RefDel.
+</P>
+
+<P>
+The input for vertex-decimation algorithms (algorithms DecDel, SiDecDel,
+DecCDT, SiDecCDT)
+is an ASCII file made up of a mandatory part containing a set of vertices
+and a set of triangles (together forming a triangulation), followed by an 
+optional part containing a set of straight-line segments, subset of the
+triangulation edges (forming the constraints of a constrained
+triangulation).
+</P>
+
+<P>
+The syntax for the mandatory part is the following:
+
+<PRE>
+NumPoints          // Number of points (INTEGER, greater or equal to 3)
+
+X1 Y1 Z1           // First point (three FLOATs)
+X2 Y2 Z2           // Second point (three FLOATs)
+...
+Xn Yn Yn           // Last point (three FLOATs), n = NumPoints
+
+NumTriangles       // Number of triangles (INTEGER, greater or equal to 1)
+
+I1 J1 K1           // First triangle (three INTEGERs)
+I1 J2 K2           // Second triangle (three INTEGERs)
+...
+Xt Yt Yt           // Last triangle (three INTEGERs), t = NumTriangles
+</PRE>
+
+Integers <TT>Ik</TT>, <TT>Jk</TT> and <TT>Kk</TT> are the indices of the 
+three vertices of the <TT>k</TT>-th triangle in the triangulation.
+The range of valid indices is <TT>[0,NumPoints-1]</TT>.
+</P>
+
+<P>
+The syntax for the optional part is the following:
+
+<PRE>
+NumSegments        // Number of segments (INTEGER, greater or equal to 0)
+
+I1 J1              // First segment (two INTEGERs)
+I2 J2              // Second segment (two INTEGERs)
+...
+Im Jm              // Last segment (two INTEGERs), m = NumSegments 
+</PRE>
+
+Integers <TT>Ik</TT> and <TT>Jk</TT> are the indices of the two endpoints
+of the <TT>k</TT>-th constraint segment in the previous list of vertices; 
+the range of valid indices is <TT>[0,NumPoints-1]</TT>.
+</P>
+
+<H4>Output files</H4>
+
+<P>
+The output for all algorithms 
+is an ASCII file containing a set of vertices
+and a set of triangles (together forming a triangulation), possibly
+followed by a set of straight-line segments, subset of the
+triangulation edges (forming the constraints of a constrained
+triangulation).
+</P>
+
+<P>
+The syntax of such file is the same as that of the input file for
+vertex-removal algorithms (see description above).
+</P>
+
+<P>
+If the algorithm is used in the version that produces an MT,
+some files containing it are also written, see 
+<A HREF="#WHERE_MT">explanation above</A>.
+</P>
+
+<H4>Naming conventions</H4>
+
+<P>
+By convention, in all the examples of program calls, we have assumed
+that files containing just points have extension .pts,
+files containing points and segments have extension .seg,
+files containing a standard (unconstrained) triangulation
+have extension .tri, and files containing a constrained triangulation
+have extensiont .cdt.
+</P>
+
+<A NAME="CDT"></A>
+
+<H3>Decimation of a constrained Delaunay triangulation</H3>
+
+<P>
+It is often desirable to maintain certain known lineal features of a terrain
+(e.g., rivers, ridges, isolines, etc.) in such a way that they are
+represented at different resolutions in the MT.
+</P>
+
+<P>
+Algorithm DecCDT builds a terrain MT that incorporates lineal features at
+multiple resolutions.
+This is done by iterative removal of vertices and simplification of the
+polylines forming the features, in the following way:
+<UL>
+<LI>
+  Vertices that are not endpoints of any feature edge are treated
+  as in the standard case.
+<LI>
+  Vertices that are endpoints of three or more feature edges are
+  not removed.
+<LI>
+  Vertices that are endpoints of exactly two feature edges, if selected for
+  removal, cause the removal of the two feature edges and their replacement
+  with a new feature edge joining the surviving endpoints of the two
+  disappearing feature edges (a polyline is simplified by merging two
+  consecutive segments into one segment).
+<LI>
+  Vertices that are endpoints of exactly one feature edge by default
+  cannot be removed. One can enable their removal through a command-line
+  option. In this case, if selected for removal, 
+  they cause the removal of the feature edge incident in them (a
+  polyline is shortened).
+</UL>
+
+<IMG ALIGN=MIDDLE SRC="GIF/deccdt.gif" ><BR>
+
+In the current implementation, the horizontal error caused by the 
+approximation of the lineal features with coarser and coarser polylines 
+is not evaluated.
+In future releases, we plan to evaluate such error and use it for driving
+the selection of points to be removed.
+</P>
+
+<H3>Conversion utilities</H3>
+
+<P>
+Data for a terrain can be:
+<OL>
+<LI>a set of scattered points (and segments)
+<LI>a Triangulated Irregular Network (TIN)
+<LI>a grid of points
+</OL>
+
+In case 1 a refinement algorithm can be applied directly.
+In order to apply a decimation algorithm first use a refinement
+algorithm to build a triangulation containing all the given points
+(and segments).
+</P>
+
+<P>
+In case 2 a decimation algorithm can be applied directly.  
+In order to apply a refinement algorithm, just forget the
+existing triangles and reduce to a set of points.
+</P>
+
+<P>
+Case 3 can be considered as a subcase of A or as a subcase of B, since
+it is straightforward to abtain a regular triangulation of the grid.
+A grid file usually contains just the height of the data points.
+Since the programs in MT Delaunay 
+need the x-y coordinates as well (they assumes to deal with
+scattered points) a conversion utility is provided.
+Another conversion utility produces x-y coordinates aa well as the triangles
+of a regular triangulation of the grid.
+</P>
+
+<P>
+The two utility programs are:
+<UL>
+<LI>grid2pts.c  given a grid, produce a point file
+<LI>grid2tri.c  given a grid, produce a triangulation file
+</UL>
+
+The resulting files can be processed by the programs within MT Delaunay.
+</P>
+
+</BODY>
+
+</HTML>

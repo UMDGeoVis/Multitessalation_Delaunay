@@ -1,0 +1,144 @@
+COMPILATION
+
+These files can be compiled in two ways
+
+FIRST WAY
+
+Use simpmake as make file.
+
+The output of the programs is a triangulation.
+
+make -f simpmake RefDel
+make -f simpmake DecDel
+make -f simpmake SiDecDel
+
+RefDel takes a file containing a set of points and build a Delaunay
+triangulation through refinement (iterative insertion of points starting
+from a triangulation of the convex hull of the given point set).
+
+DecDel takes a file containing a Delaunay triangulation and computes a
+(simplified) Delaunay triangulation through decimation (iterative removal
+of vertices).
+
+SiDecDel acts like DecDel but, instead of choosing the vertices to be 
+removed one at a time, selects a set of independently removable vertices
+(vertices with disjoint regions of influence).
+
+SECOND WAY
+
+Use mtmake as make file.
+You may have to edit mtmake to make sure that MT_DIR points to the 
+directory containing the MT package.
+
+The output of the programs is a triangulation and, in addition, a
+multi-resolution model is generated and written on files
+output.mtf (the actual multiresolution model) and
+output.err (the approximation errors associated with its triangles).
+The multiresolution model is a Multi-Tesselation (MT) and is managed
+by the MT package.
+
+make -f mtmake MtRefDel
+make -f mtmake MtDecDel
+make -f mtmake MtSiDecDel
+
+USAGE
+
+Let xxx be the executable (one of the above mentioned ones).
+
+xxx input_file output_file
+
+where input_file is a file containing either a set of points (for RefDel 
+and mtRefDel) or a triangulation (for the others),
+output_file will contain the final triangulation.
+
+In case the executable starts with "mt", at the end of the process the
+files output.mtf and output.err are also generated.
+In this case, the programs also generates some auxiliary files, whose
+name ends with "aux". Such files can simply be deleted at the end.
+
+-------------------------------------------------------------------------
+*************************************************************************
+* Input files must have the following rules:				*
+* - must not have collinear points                                      *
+* - points with same x,y coordinates must have different values of z    *
+* - domain must be convex                                               *
+*************************************************************************
+-------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+input parameters description:
+-----------------------------------------------------------------------------
+Next Point:
+Mutually exclusive options for selecting the next point to be inserted / removed.
+Possible values:
+	e: Error-driven selection. 
+	r: Random selection. 
+
+--------------
+Vertex degrees:
+Mutually exclusive options for the max degree of removable vertices: 
+value is  an integer
+0: No constraint - Vertices of any degree can be removed. 
+s: maxdegree     - Set an upper bound to the degree of a removable vertex (e.g., with s 10 only vertices of degree at most 10 can be removed). 
+
+--------------
+Computation termination conditions:
+Mutually exclusive options for setting the termination condition :
+	u: update number  
+	   Stop when the given number of vertices has been inserted or removed (e.g., u 100 inserts / removes 100 vertices).  
+	   In decimation algorithms, a set of non-removable vertices (the ones defining corners of the domain, the ones with 
+	   a too high degree w.r.t. a -deg option) will remain in any case.         
+	e: error level
+	   Stop when the approximation error of the current triangulation reaches the given value. 
+	   Parameter norm specifies how to compute the global error of the triangulation
+	   norm:
+	     x: maximum error over all triangles;
+	     s: mean error over all triangles;
+	     q: mean of squared triangle errors;
+	     
+--------------------------------------------------------------------------
+File Formats
+--------------------------------------------------------------------------
+--------------
+Input files
+--------------
+The input for vertex-insertion algorithm (mtRefDel) is an ASCII file made up of a mandatory part containing a set of vertices 
+to be inserted in the triangulation, followed by an optional part containing a set of straight-line segments having their 
+endpoints in the given vertex set. 
+The syntax  is the following: 
+
+NumPoints          // Number of points (INTEGER, greater or equal to 3)
+
+X1 Y1 Z1           // First point (three FLOATs)
+X2 Y2 Z2           // Second point (three FLOATs)
+...
+Xn Yn Yn           // Last point (three FLOATs), n = NumPoints
+
+The input for vertex-decimation algorithms (MtDecDel and MtSiDecDel) is an ASCII file made up of a mandatory part containing a set of 
+vertices and a set of triangles (together forming a triangulation).
+
+The syntax for the mandatory part is the following: 
+
+NumPoints          // Number of points (INTEGER, greater or equal to 3)
+
+X1 Y1 Z1           // First point (three FLOATs)
+X2 Y2 Z2           // Second point (three FLOATs)
+...
+Xn Yn Yn           // Last point (three FLOATs), n = NumPoints
+
+NumTriangles       // Number of triangles (INTEGER, greater or equal to 1)
+
+I1 J1 K1           // First triangle (three INTEGERs)
+I1 J2 K2           // Second triangle (three INTEGERs)
+...
+Xt Yt Yt           // Last triangle (three INTEGERs), t = NumTriangles
+
+Integers Ik, Jk and Kk are the indices of the three vertices of the k-th triangle in the triangulation. The range of valid indices is [0,NumPoints-1]. 
+
+
+--------------
+Output files
+--------------
+The output for all algorithms is an ASCII file containing a set of vertices and a set of triangles (together forming a triangulation), 
+The syntax of such file is the same as that of the input file for vertex-removal algorithms (see description above). 
+

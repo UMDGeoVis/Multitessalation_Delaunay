@@ -1,0 +1,2 @@
+ LD_LIBRARY_PATH=../../MT/lib
+ export LD_LIBRARY_PATH
